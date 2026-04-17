@@ -25,7 +25,7 @@ jobs:
         run: |
           echo "Waiting for API..."
           sleep 10
-          curl --retry 10 --retry-delay 3 --retry-connrefused http://localhost:3000
+          curl --retry 10 --retry-delay 3 --retry-connrefused http://localhost:3000/dev/users
 
       - name: Execute_API_Tests
         run: mvn clean test
