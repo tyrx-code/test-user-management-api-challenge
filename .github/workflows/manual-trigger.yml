@@ -1,40 +1,52 @@
-name: TGR_Manual_Trigger_Tests
+name: TGR_QA_Run_Scripts
 
 on:
   workflow_dispatch:
 
 jobs:
-  test:
+  automated-test-suite:
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout_Code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Set_Up_JDK
-        uses: actions/setup-java@v3
+        uses: actions/setup-java@v4
         with:
           java-version: '17'
           distribution: 'temurin'
 
       - name: Set_Up_Docker_Image_Container
         run: |
-          docker run -p 3000:3000 ghcr.io/danielsilva-loanpro/sdet-interview-challenge:latest
+          docker run -d -p 3000:3000 ghcr.io/danielsilva-loanpro/sdet-interview-challenge:latest
 
       - name: Wait_For_Readines
         run: |
           echo "Waiting for API..."
-          sleep 10
-          curl --retry 10 --retry-delay 3 --retry-connrefused http://localhost:3000
+          for i in {1..20}; do
+            if curl -s http://localhost:3000/dev/users; then
+              echo "API is ready!"
+              break
+            fi
+            echo "Attempt $i failed, retrying in 5s..."
+            sleep 5
+          done
+
+      - name: Check_Container
+        run: |
+          docker ps -a
+          curl -v http://localhost:3000/dev/users
 
       - name: Execute_API_Tests
         run: mvn clean test
+        working-directory: sdet
         env:
-          BASE_URL: http://localhost:3000
+          BASE_URL: http://localhost:3000/dev
 
       - name: Upload_Test_Results
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         if: always()
         with:
           name: extent-report
-          path: target/extent-report/index.html
+          path: sdet/target/extent-report/index.html
