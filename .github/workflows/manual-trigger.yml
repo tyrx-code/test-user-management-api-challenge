@@ -24,24 +24,22 @@ jobs:
       - name: Wait_For_Readines
         run: |
           echo "Waiting for API..."
-          sleep 10
-          curl --retry 10 --retry-delay 3 --retry-connrefused http://localhost:3000/dev/users
           for i in {1..20}; do
-            if curl -s http://localhost:3000/users; then
+            if curl -s http://localhost:3000/dev/users; then
               echo "API is ready!"
-            break
+              break
             fi
-              echo "Attempt $i failed, retrying in 5s..."
+            echo "Attempt $i failed, retrying in 5s..."
             sleep 5
           done
 
       - name: Check_Container
-        run:
+        run: |
           docker ps -a
-          curl -v http://localhost:3000/users
+          curl -v http://localhost:3000/dev
 
       - name: Watch_Logs
-        if: always
+        if: always()
         run:
           docker logs api-server
 
