@@ -36,12 +36,7 @@ jobs:
       - name: Check_Container
         run: |
           docker ps -a
-          curl -v http://localhost:3000/dev
-
-      - name: Watch_Logs
-        if: always()
-        run:
-          docker logs api-server
+          curl -v http://localhost:3000/dev/users
 
       - name: Execute_API_Tests
         run: mvn clean test
