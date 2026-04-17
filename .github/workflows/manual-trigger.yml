@@ -26,12 +26,30 @@ jobs:
           echo "Waiting for API..."
           sleep 10
           curl --retry 10 --retry-delay 3 --retry-connrefused http://localhost:3000/dev/users
+          for i in {1..20}; do
+            if curl -s http://localhost:3000/users; then
+              echo "API is ready!"
+            break
+            fi
+              echo "Attempt $i failed, retrying in 5s..."
+            sleep 5
+          done
+
+      - name: Check_Container
+        run:
+          docker ps -a
+          curl -v http://localhost:3000/users
+
+      - name: Watch_Logs
+        if: always
+        run:
+          docker logs api-server
 
       - name: Execute_API_Tests
         run: mvn clean test
         working-directory: sdet
         env:
-          BASE_URL: http://localhost:3000/users
+          BASE_URL: http://localhost:3000/dev
 
       - name: Upload_Test_Results
         uses: actions/upload-artifact@v4
