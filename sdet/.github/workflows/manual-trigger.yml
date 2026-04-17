@@ -1,0 +1,40 @@
+name: TGR_Manual_Trigger_Tests
+
+on:
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout_Code
+        uses: actions/checkout@v3
+
+      - name: Set_Up_JDK
+        uses: actions/setup-java@v3
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Set_Up_Docker_Image_Container
+        run: |
+          docker run -p 3000:3000 ghcr.io/danielsilva-loanpro/sdet-interview-challenge:latest
+
+      - name: Wait_For_Readines
+        run: |
+          echo "Waiting for API..."
+          sleep 10
+          curl --retry 10 --retry-delay 3 --retry-connrefused http://localhost:3000
+
+      - name: Execute_API_Tests
+        run: mvn clean test
+        env:
+          BASE_URL: http://localhost:3000
+
+      - name: Upload_Test_Results
+        uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: extent-report
+          path: target/extent-report/index.html

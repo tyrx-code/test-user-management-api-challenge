@@ -5,7 +5,10 @@ import static io.restassured.RestAssured.*;
 
 public class MyUtils {
 
-    private static final String BASE_URL = "http://localhost:3000/dev/";
+    private static final String BASE_URL = System.getenv("BASE_URL") != null
+            ? System.getenv("BASE_URL")
+            : "http://localhost:3000";
+
     public static RequestSpecification getRequest() {
         return given()
                 .baseUri(BASE_URL)
