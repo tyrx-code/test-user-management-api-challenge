@@ -9,10 +9,10 @@ jobs:
 
     steps:
       - name: Checkout_Code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Set_Up_JDK
-        uses: actions/setup-java@v3
+        uses: actions/setup-java@v4
         with:
           java-version: '17'
           distribution: 'temurin'
@@ -29,11 +29,12 @@ jobs:
 
       - name: Execute_API_Tests
         run: mvn clean test
+        working-directory: sdet
         env:
           BASE_URL: http://localhost:3000
 
       - name: Upload_Test_Results
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         if: always()
         with:
           name: extent-report
