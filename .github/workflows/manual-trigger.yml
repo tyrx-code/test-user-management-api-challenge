@@ -19,7 +19,7 @@ jobs:
 
       - name: Set_Up_Docker_Image_Container
         run: |
-          docker run -p 3000:3000 ghcr.io/danielsilva-loanpro/sdet-interview-challenge:latest
+          docker run -d -p 3000:3000 --name ghcr.io/danielsilva-loanpro/sdet-interview-challenge:latest
 
       - name: Wait_For_Readines
         run: |
