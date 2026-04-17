@@ -31,11 +31,11 @@ jobs:
         run: mvn clean test
         working-directory: sdet
         env:
-          BASE_URL: http://localhost:3000
+          BASE_URL: http://localhost:3000/users
 
       - name: Upload_Test_Results
         uses: actions/upload-artifact@v4
         if: always()
         with:
           name: extent-report
-          path: target/extent-report/index.html
+          path: sdet/target/extent-report/index.html

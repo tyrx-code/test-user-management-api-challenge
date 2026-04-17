@@ -83,4 +83,15 @@ public class StepDefinitions {
             assertNotNull("Name is missing", user.get("name"));
         }
     }
+
+    @When("I send a POST request to {string}")
+    public void iSendAPOSTRequestTo(String path, String body) {
+        response = MyUtils.post(path, body);
+    }
+
+    @When("I send a DELETE request to {string} {string}")
+    public void iSendADELETERequestTo(String path, String email) {
+        String fullPath = path + email;
+        response = MyUtils.delete(fullPath);
+    }
 }
