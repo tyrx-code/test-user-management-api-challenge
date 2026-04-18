@@ -73,6 +73,7 @@
                 <version>3.2.2</version>
                 <configuration>
                     <redirectTestOutputToFile>false</redirectTestOutputToFile>
+                    <reportsDirectory>${project.build.directory}/surefire-reports</reportsDirectory>
                 </configuration>
             </plugin>
         </plugins>

@@ -2,10 +2,23 @@ name: TGR_QA_Run_Scripts
 
 on:
   workflow_dispatch:
+    inputs:
+      tag:
+        type: choice
+        options:
+          - health-check
+          - smoke
+          - full-regression
+          - e2e
+        description: Select test tag
 
 jobs:
   automated-test-suite:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      actions: read
+      checks: write
 
     steps:
       - name: Checkout_Code
@@ -39,7 +52,7 @@ jobs:
           curl -v http://localhost:3000/dev/users
 
       - name: Execute_API_Tests
-        run: mvn clean test
+        run: mvn clean test -Dcucumber.filter.tags="@${{ github.event.inputs.tag }}"
         working-directory: sdet
         env:
           BASE_URL: http://localhost:3000/dev
@@ -50,3 +63,11 @@ jobs:
         with:
           name: Download-HTML-Report
           path: sdet/target/extent-report/index.html
+
+      - name: Test_Summary_Report
+        uses: dorny/test-reporter@v1
+        if: success() || failure()
+        with:
+          name: Cucumber Tests
+          path: sdet/target/surefire-reports/TEST-*.xml
+          reporter: java-junit
