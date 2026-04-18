@@ -1,6 +1,7 @@
 @full-regression @smoke
 Feature: API Validation, Basic Positive Tests
 
+  @health-check
   Scenario: Validate POST Action, Create User
     When I send a POST request to "/users" with body:
     """
@@ -14,17 +15,20 @@ Feature: API Validation, Basic Positive Tests
     And show response
     And the response time is less than 400 milliseconds
 
+  @health-check
   Scenario: Validate GET Action, Fetch All Users Data
     When I send a GET request to "/users"
     Then the response status code should be 200
     And show response
     And the response time is less than 400 milliseconds
 
+  @health-check
   Scenario: Validate GET Action, Fetch User By Email
     When I send a GET request to "/users/" "gh_test_jane@example.com"
     Then the response status code should be 200
     And the response time is less than 400 milliseconds
 
+  @health-check
   Scenario: Validate GET Action, Fetch All Users And Pick First One
     When I send a GET request to "/users"
     Then the response status code should be 200
@@ -43,6 +47,7 @@ Feature: API Validation, Basic Positive Tests
     Then the response status code should be 404
     And the response time is less than 400 milliseconds
 
+  @health-check
   Scenario: Validate DELETE Action, Remove User byEmail
     When I send a DELETE request to "/users/" "gh_test_jane@example.com"
     Then the response status code should be 204
