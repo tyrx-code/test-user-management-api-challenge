@@ -79,3 +79,4 @@ jobs:
           path: sdet/target/surefire-reports/TEST-*.xml
           reporter: java-junit
           fail-on-error: false
+          use-actions-summary: true

@@ -164,12 +164,24 @@ public class StepDefinitions {
         );
     }
 
+    @And("the response body does not expose stack trace")
+    public void theResponseBodyDoesNotExposeStackTrace() {
+        String body = response.getBody().asString().toLowerCase();
+
+        assertFalse("Stack trace exposed!", body.contains("stack trace"));
+        assertFalse("Exception exposed!",   body.contains("exception"));
+        assertFalse("SQL error exposed!",   body.contains("sql"));
+        assertFalse("Server error exposed!", body.contains("at com."));
+        assertFalse("Internal path exposed!", body.contains("/usr/"));
+
+        ExtentCucumberAdapter.getCurrentStep().info("No sensitive data exposed");
+    }
+
     @After("@cleanup")
     public void tearDown() {
         if (extractedEmail != null && !extractedEmail.isEmpty()) {
             Response deleteResponse = MyUtils.delete("/users/" + extractedEmail);
-            System.out.println("Teardown - Deleted user: " + extractedEmail +
-                    " Status: " + deleteResponse.getStatusCode());
+            System.out.println("Teardown, Removing user: " + extractedEmail + " Status: " + deleteResponse.getStatusCode());
 
             extractedEmail = null;
         }
