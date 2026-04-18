@@ -15,6 +15,10 @@ on:
 jobs:
   automated-test-suite:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      actions: read
+      checks: write
 
     steps:
       - name: Checkout_Code
