@@ -1,4 +1,5 @@
-Feature: API Validation
+@full-regression @smoke
+Feature: API Validation, Basic Positive Tests
 
   Scenario: Validate POST Action, Create User
     When I send a POST request to "/users" with body:
@@ -49,4 +50,22 @@ Feature: API Validation
 
   Scenario: Validate DELETE Action, Try To Remove Non-Existing
     When I send a DELETE request to "/users/" "non-existing"
+    Then the response status code should be 404
+
+  Scenario: Validate DELETE Action, Already Deleted
+    When I send a POST request to "/users" with body:
+      """
+      {
+        "name": "E2E_GH_Test_Jane_Doe",
+        "email": "{{randomEmail}}",
+        "age": 45
+      }
+      """
+    Then the response status code should be 201
+    And I extract the email from the response
+
+    When I send a DELETE with extracted email to "/users/"
+    Then the response status code should be 204
+
+    When I send a DELETE with extracted email to "/users/"
     Then the response status code should be 404

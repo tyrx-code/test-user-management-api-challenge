@@ -48,5 +48,5 @@ jobs:
         uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: extent-report
+          name: Download-HTML-Report
           path: sdet/target/extent-report/index.html
