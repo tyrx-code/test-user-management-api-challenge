@@ -1,11 +1,17 @@
 package com.tests.steps;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tests.utils.MyUtils;
 import io.cucumber.java.PendingException;
 import io.cucumber.java.en.*;
+import io.restassured.module.jsv.JsonSchemaValidator;
 import io.restassured.response.Response;
 import com.aventstack.extentreports.cucumber.adapter.ExtentCucumberAdapter;
+import io.cucumber.java.After;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import static org.junit.Assert.*;
 
@@ -13,6 +19,9 @@ public class StepDefinitions {
 
     private Response response;
     private String extractedEmail;
+    private String updatedName;
+    private String updatedEmail;
+    private int updatedAge;
 
     @When("I send a GET request to {string}")
     public void iSendAGetRequest(String path) {
@@ -26,7 +35,12 @@ public class StepDefinitions {
 
     @When("I send a POST request to {string} with body:")
     public void iSendAPostRequest(String path, String body) {
-        response = MyUtils.post(path, body);
+        String randomEmail = "e2e_test_" + UUID.randomUUID().toString().substring(0, 10) + "@example.com";
+
+        String dynamicBody = body.replace("{{randomEmail}}", randomEmail);
+
+        System.out.println("Generated email: " + randomEmail);
+        response = MyUtils.post(path, dynamicBody);
     }
 
     @Then("the response status code should be {int}")
@@ -65,7 +79,7 @@ public class StepDefinitions {
 
     @And("I extract the email from the first user")
     public void iExtractTheEmailFromTheFirstUser() {
-        extractedEmail = response.jsonPath().getString("[0].email"); // grabs first user's email
+        extractedEmail = response.jsonPath().getString("[0].email");
         System.out.println("Extracted email: " + extractedEmail);
     }
 
@@ -93,5 +107,71 @@ public class StepDefinitions {
     public void iSendADELETERequestTo(String path, String email) {
         String fullPath = path + email;
         response = MyUtils.delete(fullPath);
+    }
+
+    @When("I send a DELETE with extracted email to {string}")
+    public void iSendADELETEWithExtractedEmailTo(String basePath) {
+        response = MyUtils.delete(basePath + extractedEmail);
+    }
+
+    @When("I send a PUT request with extracted email to {string} with body:")
+    public void iSendAPUTRequestWithExtractedEmailToWithBody(String basePath, String body) throws JsonProcessingException {
+        String fullPath = basePath + extractedEmail;
+        ObjectMapper mapper = new ObjectMapper();
+        JsonNode payload = mapper.readTree(body);
+
+        updatedName  = payload.get("name").asText();
+        updatedEmail = payload.get("email").asText();
+        updatedAge = payload.get("age").asInt();
+
+        response = MyUtils.put(fullPath, body);
+    }
+
+    @And("the update is part of response")
+    public void theUpdateIsPartOfResponse() {
+        String responseName  = response.jsonPath().getString("name");
+        String responseEmail = response.jsonPath().getString("email");
+        int responseAge = response.jsonPath().getInt("age");
+
+        assertEquals("Name mismatch",  updatedName,  responseName);
+        assertEquals("Email mismatch", updatedEmail, responseEmail);
+        assertEquals("Age mismatch", updatedAge, responseAge);
+    }
+
+    @And("I extract the email from the response")
+    public void iExtractTheEmailFromTheResponse() {
+        extractedEmail = response.jsonPath().getString("email");
+        System.out.println("Extracted email: " + extractedEmail);
+    }
+
+    @When("I send a POST request to {string} with name {string} email {string} and age {string}")
+    public void iSendAPOSTRequestToWithNameEmailAndAge(String path, String name, String email, String age) {
+        String body = String.format("""
+        {
+          "name": "%s",
+          "email": "%s",
+          "age": "%s"
+        }
+        """, name, email, age);
+
+        response = MyUtils.post(path, body);
+    }
+
+    @And("the error schema is matching")
+    public void theErrorSchemaIsMatching() {
+        response.then().assertThat().body(
+                JsonSchemaValidator.matchesJsonSchemaInClasspath("schemas/badRequest.json")
+        );
+    }
+
+    @After("@cleanup")
+    public void tearDown() {
+        if (extractedEmail != null && !extractedEmail.isEmpty()) {
+            Response deleteResponse = MyUtils.delete("/users/" + extractedEmail);
+            System.out.println("Teardown - Deleted user: " + extractedEmail +
+                    " Status: " + deleteResponse.getStatusCode());
+
+            extractedEmail = null;
+        }
     }
 }
