@@ -28,7 +28,7 @@ Feature: API Validation, Basic Positive Tests
     Then the response status code should be 200
     And the response time is less than 400 milliseconds
 
-  @health-check @prod-smoke
+  @health-check
   Scenario: Validate GET Action, Fetch All Users And Pick First One
     When I send a GET request to "/users"
     Then the response status code should be 200
