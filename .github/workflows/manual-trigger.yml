@@ -99,7 +99,7 @@ jobs:
           echo "> Metrics Overview — for full details check the **Cucumber Tests** report in the left panel." >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           
-          echo "### Run Configuration" >> $GITHUB_STEP_SUMMARY
+          echo "### Run Data" >> $GITHUB_STEP_SUMMARY
           echo "| Metric | Value |" >> $GITHUB_STEP_SUMMARY
           echo "|--------|-------|" >> $GITHUB_STEP_SUMMARY
           echo "| Environment | ${{ github.event.inputs.env }} |" >> $GITHUB_STEP_SUMMARY

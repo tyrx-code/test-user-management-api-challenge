@@ -49,6 +49,7 @@ mvn clean test -Denv=dev -Dcucumber.filter.tags="@full-regression"
 Workflow run is a manual trigger (using workflow-dispatch):
 - **How to run**, click on Actions > Select Pipeline > Click RUn Workflow > Select Options
 <br>
+
 - **Environment** — "dev" & "prod"
 - **Tag** — Which "tag" u want to run
 ---
@@ -56,11 +57,20 @@ Workflow run is a manual trigger (using workflow-dispatch):
 ## Test Report Summary
 
 After running locally, target folder will be generated per run:
-```
+
 target/extent-report/index.html OR target/cucumber-reports.html
-- **Im using Dorny plugin** — To allow TSR Dynamic in every run.
-- **Im using Artifact upload** — To get an html file for each run despite of status.
-```
+- **Im using Dorny plugin** — To allow TSR Dynamic in every run. Allows more details and has good lookAndFeel.
+- **Im using Artifact upload** — To get an html file for each run despite of status. You can download the html file.
+- **Im generating a md file at workflow runtime** - To show a quick view of Summary with failed tests.
+- **Sample Run** https://github.com/tyrx-code/test-user-management-api-challenge/actions/runs/24624431724/job/72000822987
+
+| Metric      | Value           |
+|-------------|-----------------|
+| Environment | Development     |
+| Tag         | full-regression |
+| Total Tests | 40              |
+| Failures    | 12              |
+
 ---
 
 ## Current Bug Report
@@ -155,6 +165,182 @@ target/extent-report/index.html OR target/cucumber-reports.html
   "age": 30,
   "email": "my_mail_test_jane@example.com",
   "name": 1
+}
+```
+### Bug_POST_Accepting_Invalid_Email_Attribute_Not_Handling_Invalid_Format
+
+**Steps to Reproduce:**
+1. Create a POST Request With Valid Payload but set incorrect data for Name Attribute: ```json {"name": "tomas","email": "invalidMail","age": 30}  ```
+2. Execute
+
+**Expected Result:** Error properly handled as BadRequest with status code 400.
+
+**Actual Result:** Getting Success Responses, email format is not validated.
+
+**Evidence**
+```json
+{
+  "age": 30,
+  "email": "invalidMail",
+  "name": "tomas"
+}
+```
+### Bug_POST_Accepting_Invalid_Object_Type_For_Name_Attribute_Security
+
+**Steps to Reproduce:**
+1. Create a POST Request With Valid Payload but set incorrect data for Name Attribute: ```json {"name": {"$gt": ""} ,"email": "valid@mail.com","age": 30}  ```
+2. Execute
+
+**Expected Result:** Error properly handled as BadRequest with status code 400.
+
+**Actual Result:** Getting Server Side Errors 500s. We are allowing bad payloads reach backend.
+
+**Evidence**
+```json
+{
+  "error": "Internal server error"
+}
+```
+### Bug_PUT_Updated_Payload_Not_Persisting
+
+**Steps to Reproduce:**
+1. Create a PUT Request With Valid Payload and point to existing email: ```json {"name": "UpdatedName" ,"email": "valid@mail.com","age": 40}  ```
+2. Execute
+
+**Expected Result:** Success response and data persisting in DB, new changes correctly updated.
+
+**Actual Result:** Getting Success Responses with matching response body, BUT data not being stored in DB.
+
+**Evidence** 
+```json
+//Put response:
+{
+  "name": "UpdatedName",
+  "email": "valid@mail.com",
+  "age": 30
+}
+```
+```json
+//Get response:
+{
+  "name": "tomas",
+  "email": "valid@mail.com",
+  "age": 30
+}
+```
+### Bug_PUT_Accepting_Invalid_Data_Type_For_Name_Attribute
+
+**Steps to Reproduce:**
+1. Create a PUT Request With Valid Payload and point to existing email: ```json {"name": true ,"email": "valid@mail.com","age": 40}  ```
+2. Execute
+
+**Expected Result:** Error properly handled as BadRequest with status code 400.
+
+**Actual Result:** Getting Success Responses, schema definition explicitly mentions name as string.
+
+**Evidence**
+```json
+{
+  "name": true,
+  "email": "valid@mail.com",
+  "age": 30
+}
+```
+### Bug_DELETE_Open_Authorization
+
+**Steps to Reproduce:**
+1. Create a DELETE Request With Valid ID But not Valid Authorization.
+2. Execute
+
+**Expected Result:** Error properly handled as Unauthorized with status code 401.
+
+**Actual Result:** Getting Success Responses NoContent and id being removed. Auth is missing, all open endpoints.
+
+**Evidence**
+```json
+NoContent
+```
+### Bug_DELETE_Added_Authorization_And_No_Removal_Completed_In_Prod
+
+**Steps to Reproduce:**
+1. Create a DELETE Request With Valid ID and Valid Authorization.
+2. Execute
+
+**Expected Result:** Get Success NoContent and data removal.
+
+**Actual Result:** Getting Unauthorized 401 status, even with right token.
+
+**Evidence**
+```json
+{
+  "error": "Authentication required"
+}
+```
+### Bug_Documentation_Sample_Responses_Attributes_Not_Ordered
+
+**Steps to Reproduce:**
+1. Navigate to Swagger and display Unsafe Verbs Post,Put.
+2. Check for sample response.
+3. Review the schema attributes, all attributes are not ordered.
+4. Perform real Post,Put Action and check for Response Body.
+5. Actual Response Body shows all attributes alphabetical ordered.
+
+**Expected Result:** Matching between schema, samples and actual response.
+
+**Actual Result:** Minor mismatch between schema, sample and actual response. All attributes displayed but in different order.
+
+**Evidence**
+```json
+{
+  //Swagger
+  "name": "Jane Doe",
+  "email": "jane@example.com",
+  "age": 30
+}
+```
+```json
+{
+  //Actual Response
+  "age": 30,
+  "email": "jane@example.com",
+  "name": "Jane Doe"
+}
+```
+### Bug_Documentation_Sample_Responses_Attributes_Not_Ordered
+
+**Steps to Reproduce:**
+1. Navigate to Swagger and display All Verbs.
+2. Check for sample error responses for each client error. 
+3. Perform real Action with invalid input and check for Error Response Body. 
+4. Actual Response Body shows different error message.
+
+**Expected Result:** Matching between schema, samples and actual response.
+
+**Actual Result:** Minor mismatch between schema, sample and actual response. Swagger defines every client side as "notFound".
+
+**Evidence**
+```json
+{
+  //Swagger Error for BadRequest
+  "error": "User not found"
+}
+```
+```json
+{
+  //Swagger Error for Conflict
+  "error": "User not found"
+}
+```
+```json
+{
+  //Actual Error for BadRequest
+  "error": "name is required"
+}
+```
+```json
+{
+  //Actual Error for Conflict
+  "error": "Email already exists"
 }
 ```
 ---
