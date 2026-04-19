@@ -48,7 +48,7 @@ mvn clean test -Denv=dev -Dcucumber.filter.tags="@full-regression"
 
 Workflow run is a manual trigger (using workflow-dispatch):
 - **How to run**, click on Actions > Select Pipeline > Click RUn Workflow > Select Options
--
+<br>
 - **Environment** — "dev" & "prod"
 - **Tag** — Which "tag" u want to run
 ---
