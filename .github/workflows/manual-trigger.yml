@@ -87,22 +87,28 @@ jobs:
         if: always()
         working-directory: sdet
         run: |
-          echo "#### Test Summary Report" >> $GITHUB_STEP_SUMMARY
-          echo "Run Metrics Overview. How many test pass or fail. For more details please go to Dorny/Cucumber Test Result." >> $GITHUB_STEP_SUMMARY
+          echo "## 🪲 Test Summary Report 🪲" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "> Metrics Overview — for full details check the **Cucumber Tests** report in the left panel." >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           
           echo "### Run Configuration" >> $GITHUB_STEP_SUMMARY
-          echo "| Metric | Value |" >> $GITHUB_STEP_SUMMARY
-          echo "|--------|-------|" >> $GITHUB_STEP_SUMMARY
-          echo "| Environment | ${{ github.event.inputs.env }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| Tag | ${{ github.event.inputs.tag }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Metric       | Value |" >> $GITHUB_STEP_SUMMARY
+          echo "|--------------|-------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Environment | \`${{ github.event.inputs.env }}\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| Tag         | \`@${{ github.event.inputs.tag }}\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| Run Number  | \`#${{ github.run_number }}\` |" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           
+          echo "### Results" >> $GITHUB_STEP_SUMMARY
+          echo "| Metric        | Value |" >> $GITHUB_STEP_SUMMARY
+          echo "|---------------|-------|" >> $GITHUB_STEP_SUMMARY
+          
           if [ -f target/surefire-reports/TEST-*.xml ]; then
-            TESTS=$(grep -o 'tests="[0-9]*"' target/surefire-reports/TEST-*.xml | grep -o '[0-9]*' | head -1)
-            FAILURES=$(grep -o 'failures="[0-9]*"' target/surefire-reports/TEST-*.xml | grep -o '[0-9]*' | head -1)
-            PASSED=$((TESTS - FAILURES))
-            echo "| Total Tests | $TESTS |" >> $GITHUB_STEP_SUMMARY
-            echo "| Passed | $PASSED |" >> $GITHUB_STEP_SUMMARY
-            echo "| Failures | $FAILURES |" >> $GITHUB_STEP_SUMMARY
-          fi
+          TESTS=$(grep -o 'tests="[0-9]*"' target/surefire-reports/TEST-*.xml | grep -o '[0-9]*' | head -1)
+          FAILURES=$(grep -o 'failures="[0-9]*"' target/surefire-reports/TEST-*.xml | grep -o '[0-9]*' | head -1)
+          PASSED=$((TESTS - FAILURES))
+        
+          echo "| ☑️ Passed  | $PASSED |" >> $GITHUB_STEP_SUMMARY
+          echo "| ❌ Failed  | $FAILURES |" >> $GITHUB_STEP_SUMMARY
+          echo "| #️⃣ Total   | $TESTS |" >> $GITHUB_STEP_SUMMARY
