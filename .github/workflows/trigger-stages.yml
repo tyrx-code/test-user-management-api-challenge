@@ -1,4 +1,4 @@
-name: TGR_Parallel_Environment_Run
+name: TGR_QA_Parallel_Environment_Run
 
 on:
   workflow_dispatch:
@@ -62,8 +62,8 @@ jobs:
           echo "### Run Configuration" >> $GITHUB_STEP_SUMMARY
           echo "| Metric | Value |" >> $GITHUB_STEP_SUMMARY
           echo "|--------|-------|" >> $GITHUB_STEP_SUMMARY
-          echo "| Environment | ${{ github.event.inputs.env }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| Tag | ${{ github.event.inputs.tag }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Environment | Development |" >> $GITHUB_STEP_SUMMARY
+          echo "| Tag | full-regression |" >> $GITHUB_STEP_SUMMARY
           echo "| Run | #${{ github.run_number }} |" >> $GITHUB_STEP_SUMMARY
           if [ -f target/surefire-reports/TEST-*.xml ]; then
             TESTS=$(grep -o 'tests="[0-9]*"' target/surefire-reports/TEST-*.xml | grep -o '[0-9]*' | head -1)
@@ -131,8 +131,8 @@ jobs:
           echo "### Run Configuration" >> $GITHUB_STEP_SUMMARY
           echo "| Metric | Value |" >> $GITHUB_STEP_SUMMARY
           echo "|--------|-------|" >> $GITHUB_STEP_SUMMARY
-          echo "| Environment | ${{ github.event.inputs.env }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| Tag | ${{ github.event.inputs.tag }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Environment | Production |" >> $GITHUB_STEP_SUMMARY
+          echo "| Tag | prod-smoke |" >> $GITHUB_STEP_SUMMARY
           echo "| Run | #${{ github.run_number }} |" >> $GITHUB_STEP_SUMMARY
           if [ -f target/surefire-reports/TEST-*.xml ]; then
             TESTS=$(grep -o 'tests="[0-9]*"' target/surefire-reports/TEST-*.xml | grep -o '[0-9]*' | head -1)
