@@ -109,7 +109,6 @@ Feature: API Validation, Basic Negative Tests
       """
     Then the response status code should be 409
 
-  @prod-smoke
   Scenario: Validate DELETE Action, Requires Authentication
     When I send a POST request to "/users" with body:
     """
