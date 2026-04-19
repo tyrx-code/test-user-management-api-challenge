@@ -88,14 +88,21 @@ jobs:
         working-directory: sdet
         run: |
           echo "#### Test Summary Report" >> $GITHUB_STEP_SUMMARY
-          echo "- **Run Metrics Overview** how many test pass or fail. For more details please go to Dorny/Cucumber Test Result." >> $GITHUB_STEP_SUMMARY
+          echo "Run Metrics Overview. How many test pass or fail. For more details please go to Dorny/Cucumber Test Result." >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          echo "### Run Configuration" >> $GITHUB_STEP_SUMMARY
           echo "| Metric | Value |" >> $GITHUB_STEP_SUMMARY
           echo "|--------|-------|" >> $GITHUB_STEP_SUMMARY
           echo "| Environment | ${{ github.event.inputs.env }} |" >> $GITHUB_STEP_SUMMARY
           echo "| Tag | ${{ github.event.inputs.tag }} |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
           if [ -f target/surefire-reports/TEST-*.xml ]; then
             TESTS=$(grep -o 'tests="[0-9]*"' target/surefire-reports/TEST-*.xml | grep -o '[0-9]*' | head -1)
             FAILURES=$(grep -o 'failures="[0-9]*"' target/surefire-reports/TEST-*.xml | grep -o '[0-9]*' | head -1)
+            PASSED=$((TESTS - FAILURES))
             echo "| Total Tests | $TESTS |" >> $GITHUB_STEP_SUMMARY
+            echo "| Passed | $PASSED |" >> $GITHUB_STEP_SUMMARY
             echo "| Failures | $FAILURES |" >> $GITHUB_STEP_SUMMARY
           fi
