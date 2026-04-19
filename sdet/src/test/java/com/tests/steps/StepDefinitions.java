@@ -22,6 +22,8 @@ public class StepDefinitions {
     private String updatedName;
     private String updatedEmail;
     private int updatedAge;
+    private String lastResponseBody;
+    private String secondExtractedEmail;
 
     @When("I send a GET request to {string}")
     public void iSendAGetRequest(String path) {
@@ -106,25 +108,37 @@ public class StepDefinitions {
     @When("I send a DELETE request to {string} {string}")
     public void iSendADELETERequestTo(String path, String email) {
         String fullPath = path + email;
-        response = MyUtils.delete(fullPath);
+        response = MyUtils.deleteWithAuth(fullPath);
     }
 
     @When("I send a DELETE with extracted email to {string}")
     public void iSendADELETEWithExtractedEmailTo(String basePath) {
-        response = MyUtils.delete(basePath + extractedEmail);
+        response = MyUtils.deleteWithAuth(basePath + extractedEmail);
     }
 
     @When("I send a PUT request with extracted email to {string} with body:")
     public void iSendAPUTRequestWithExtractedEmailToWithBody(String basePath, String body) throws JsonProcessingException {
-        String fullPath = basePath + extractedEmail;
+        String resolvedBody = body;
+
+        if (extractedEmail != null && resolvedBody.contains("{{currentEmail}}"))
+            resolvedBody = resolvedBody.replace("{{currentEmail}}", extractedEmail);
+
+        if (extractedEmail != null && resolvedBody.contains("{{firstUserEmail}}"))
+            resolvedBody = resolvedBody.replace("{{firstUserEmail}}", extractedEmail);
+
+        if (secondExtractedEmail != null && resolvedBody.contains("{{secondUserEmail}}"))
+            resolvedBody = resolvedBody.replace("{{secondUserEmail}}", secondExtractedEmail);
+
+        String fullPath = basePath + (secondExtractedEmail != null ? secondExtractedEmail : extractedEmail);
+
         ObjectMapper mapper = new ObjectMapper();
-        JsonNode payload = mapper.readTree(body);
+        JsonNode payload = mapper.readTree(resolvedBody);
 
         updatedName  = payload.get("name").asText();
         updatedEmail = payload.get("email").asText();
-        updatedAge = payload.get("age").asInt();
+        updatedAge   = payload.get("age").asInt();
 
-        response = MyUtils.put(fullPath, body);
+        response = MyUtils.put(fullPath, resolvedBody);
     }
 
     @And("the update is part of response")
@@ -150,7 +164,7 @@ public class StepDefinitions {
         {
           "name": "%s",
           "email": "%s",
-          "age": "%s"
+          "age": %s
         }
         """, name, email, age);
 
@@ -164,14 +178,74 @@ public class StepDefinitions {
         );
     }
 
+    @And("the response body does not expose stack trace")
+    public void theResponseBodyDoesNotExposeStackTrace() {
+        String body = response.getBody().asString().toLowerCase();
+
+        assertFalse("Stack trace exposed!", body.contains("stack trace"));
+        assertFalse("Exception exposed!",   body.contains("exception"));
+        assertFalse("SQL error exposed!",   body.contains("sql"));
+        assertFalse("Server error exposed!", body.contains("at com."));
+        assertFalse("Internal path exposed!", body.contains("/usr/"));
+
+        ExtentCucumberAdapter.getCurrentStep().info("No sensitive data exposed");
+    }
+
+    @When("I send a DELETE request without auth to {string}")
+    public void iSendDeleteWithoutAuth(String basePath) {
+        response = MyUtils.deleteNoAuth(basePath + extractedEmail);
+    }
+
     @After("@cleanup")
     public void tearDown() {
         if (extractedEmail != null && !extractedEmail.isEmpty()) {
-            Response deleteResponse = MyUtils.delete("/users/" + extractedEmail);
-            System.out.println("Teardown - Deleted user: " + extractedEmail +
-                    " Status: " + deleteResponse.getStatusCode());
+            Response deleteResponse = MyUtils.deleteWithAuth("/users/" + extractedEmail);
 
+            int status = deleteResponse.getStatusCode();
+            if (status == 204 || status == 404) {
+                System.out.println("Teardown Ok: " + status);
+            } else {
+                System.out.println("Unexpected teardown status: " + status);
+            }
             extractedEmail = null;
         }
+
+        if (secondExtractedEmail != null && !secondExtractedEmail.isEmpty()) {
+            Response delete = MyUtils.deleteWithAuth("/users/" + secondExtractedEmail);
+            System.out.println("Teardown user 2: " + secondExtractedEmail);
+            secondExtractedEmail = null;
+        }
+    }
+
+    @When("I send a PUT request to {string} with name {string} email {string} and age {string}")
+    public void iSendAPUTRequestToWithNameNameEmailEmailAndAgeAge(String path, String name, String email, String age) {
+        String fullPath = path + extractedEmail;
+
+        String body = String.format("""
+        {
+          "name": "%s",
+          "email": "%s",
+          "age": %s
+        }
+        """, name, email, age);
+
+        response = MyUtils.put(fullPath, body);
+    }
+
+    @And("I store the response body")
+    public void iStoreTheResponseBody() {
+        lastResponseBody = response.getBody().asString();
+    }
+
+    @And("the response is identical to previous")
+    public void theResponseIsIdenticalToPrevious() {
+        String currentBody = response.getBody().asString();
+        assertEquals("Response mismatch, PUT not idempotent!", lastResponseBody, currentBody);
+    }
+
+    @And("I store the second user email")
+    public void iStoreTheSecondUserEmail() {
+        secondExtractedEmail = response.jsonPath().getString("email");
+        System.out.println("Second user email: " + secondExtractedEmail);
     }
 }

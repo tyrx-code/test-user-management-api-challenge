@@ -46,7 +46,12 @@ public class MyUtils {
         return getRequest().body(body).when().put(path);
     }
 
-    public static Response delete(String path) {
+    public static Response deleteNoAuth(String path) {
         return getRequest().when().delete(path);
+    }
+
+    public static Response deleteWithAuth(String path) {
+        return given().baseUri(BASE_URL).header("Content-Type", "application/json")
+                .header("Authorization", "mysecrettoken").when().delete(path);
     }
 }

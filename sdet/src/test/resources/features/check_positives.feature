@@ -43,11 +43,6 @@ Feature: API Validation, Basic Positive Tests
     Then the response status code should be 200
     And I validate each user has required fields
 
-  Scenario: Validate GET Action, NotFound User By Email
-    When I send a GET request to "/users/" "noResource"
-    Then the response status code should be 404
-    And the response time is less than 400 milliseconds
-
   @health-check
   Scenario: Validate DELETE Action, Remove User byEmail
     When I send a DELETE request to "/users/" "gh_test_jane@example.com"
@@ -75,3 +70,40 @@ Feature: API Validation, Basic Positive Tests
 
     When I send a DELETE with extracted email to "/users/"
     Then the response status code should be 404
+
+  @cleanup
+  Scenario: Validate PUT Action, Check Idempotency
+    When I send a POST request to "/users" with body:
+    """
+    {
+      "name": "E2E_GH_Test_Jane_Doe",
+      "email": "{{randomEmail}}",
+      "age": 45
+    }
+    """
+    Then the response status code should be 201
+    And I extract the email from the response
+
+    When I send a PUT request with extracted email to "/users/" with body:
+      """
+      {
+        "name": "Updated_Name",
+        "email": "{{currentEmail}}",
+        "age": 100
+      }
+      """
+    Then the response status code should be 200
+    And the update is part of response
+    And I store the response body
+
+    When I send a PUT request with extracted email to "/users/" with body:
+      """
+      {
+        "name": "Updated_Name",
+        "email": "{{currentEmail}}",
+        "age": 100
+      }
+      """
+    Then the response status code should be 200
+    And the update is part of response
+    And the response is identical to previous

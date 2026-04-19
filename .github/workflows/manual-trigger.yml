@@ -30,6 +30,8 @@ jobs:
     steps:
       - name: Checkout_Code
         uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
 
       - name: Set_Up_JDK
         uses: actions/setup-java@v4
@@ -59,10 +61,17 @@ jobs:
           curl -v http://localhost:3000/${{ github.event.inputs.env }}/users
 
       - name: Execute_API_Tests
-        run: mvn clean test -Dcucumber.filter.tags="@${{ github.event.inputs.tag }}"
         working-directory: sdet
         env:
           BASE_URL: http://localhost:3000/${{ github.event.inputs.env }}
+        run: |
+          if [ "${{ github.event.inputs.env }}" == "prod" ]; then
+            echo "==============> Limiting the test run to safe endpoints!"
+            echo "==============> Health Checks in Prod, Regression in Non Prod."
+            mvn clean test -Dcucumber.filter.tags="@prod-smoke"
+          else
+            mvn clean test -Dcucumber.filter.tags="@${{ github.event.inputs.tag }}"
+          fi
 
       - name: Upload_Test_Results
         uses: actions/upload-artifact@v4
@@ -79,3 +88,26 @@ jobs:
           path: sdet/target/surefire-reports/TEST-*.xml
           reporter: java-junit
           fail-on-error: false
+          use-actions-summary: true
+
+      - name: Job_Summary
+        if: always()
+        working-directory: sdet
+        run: |
+          echo "## 🪲 Test Summary Report 🪲" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "> Metrics Overview — for full details check the **Cucumber Tests** report in the left panel." >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          echo "### Run Configuration" >> $GITHUB_STEP_SUMMARY
+          echo "| Metric | Value |" >> $GITHUB_STEP_SUMMARY
+          echo "|--------|-------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Environment | ${{ github.event.inputs.env }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Tag | ${{ github.event.inputs.tag }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Run | #${{ github.run_number }} |" >> $GITHUB_STEP_SUMMARY
+          if [ -f target/surefire-reports/TEST-*.xml ]; then
+            TESTS=$(grep -o 'tests="[0-9]*"' target/surefire-reports/TEST-*.xml | grep -o '[0-9]*' | head -1)
+            FAILURES=$(grep -o 'failures="[0-9]*"' target/surefire-reports/TEST-*.xml | grep -o '[0-9]*' | head -1)
+            echo "| Total Tests | $TESTS |" >> $GITHUB_STEP_SUMMARY
+            echo "| Failures | $FAILURES |" >> $GITHUB_STEP_SUMMARY
+          fi
