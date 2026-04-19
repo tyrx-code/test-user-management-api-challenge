@@ -306,7 +306,7 @@ NoContent
   "name": "Jane Doe"
 }
 ```
-### Bug_Documentation_Sample_Responses_Attributes_Not_Ordered
+### Bug_Documentation_Sample_Error_Responses_Using_Generic_404_For_All_Errors
 
 **Steps to Reproduce:**
 1. Navigate to Swagger and display All Verbs.
