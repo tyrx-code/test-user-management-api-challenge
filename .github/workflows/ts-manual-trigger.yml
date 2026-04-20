@@ -79,12 +79,5 @@ jobs:
         uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: Playwright-HTML-Report
-          path: sdet2/playwright-report/
-
-      - name: Upload_Playwright_Report
-        uses: actions/upload-artifact@v4
-        if: always()
-        with:
           name: Playwright-HTML-Report-${{ github.event.inputs.env }}-${{ github.event.inputs.tag }}
           path: sdet2/playwright-report/
