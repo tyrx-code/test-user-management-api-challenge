@@ -1,4 +1,4 @@
-name: TGR_Playwright_Tests
+name: TGR_TS_Playwright_Tests
 
 on:
   workflow_dispatch:
@@ -85,5 +85,5 @@ jobs:
         uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: Playwright-HTML-Report-${{ github.event.inputs.env }}-${{ github.event.inputs.tag }}-#${{ github.run_number }}
+          name: Playwright-HTML-Report-${{ github.event.inputs.env }}-${{ github.event.inputs.tag }}
           path: sdet2/playwright-report/
