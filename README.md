@@ -8,6 +8,11 @@
 - Below Info was created for Java Repo.
 - Bugs reports are independent of the tool.
 - If interested you can check my dummy commits at the Pull Request history, I created individual PRs for each task.
+- GH Actions, workflows:
+- TGR_Java_QA_Run_Scripts --> its a worflow_dispatch, manuall trigger. Select env and tag to run. (java)
+- TGR_Java_QA_Parallel_Environment_Run --> its a workflow_dispatch, manual trigger. Runs both prod and dev checks indepentently.
+- TGR_TS_QA_Playwright_Tests --> its a workflow_dispatch, manual trigger. Select env and tag to run. (typescript)
+- Pull_Request_Check --> this is an automatic workflow, dispatched in every PR open/edit. Simply checks for PR emptiness and runs a health check. (cant merge without pass)
 
 ## Summary
 User Management is an API for user data management (crud). In this repo I set the basics for an API test framework. 

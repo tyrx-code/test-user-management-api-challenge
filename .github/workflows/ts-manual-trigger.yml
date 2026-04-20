@@ -7,6 +7,7 @@ on:
         type: choice
         options:
           - smoke
+          - smoke-prod
           - e2e
           - negative
           - security
@@ -73,13 +74,6 @@ jobs:
         run: npx playwright test --grep @${{ github.event.inputs.tag }}
         env:
           BASE_URL: http://localhost:3000/${{ github.event.inputs.env }}
-
-      - name: Upload_Playwright_Report
-        uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: Playwright-HTML-Report
-          path: sdet2/playwright-report/
 
       - name: Upload_Playwright_Report
         uses: actions/upload-artifact@v4
