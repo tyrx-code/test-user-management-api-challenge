@@ -137,3 +137,7 @@ dist
 # Vite logs files
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
+
+sdet2/playwright-report/
+sdet2/test-results/
+sdet2/.playwright/
