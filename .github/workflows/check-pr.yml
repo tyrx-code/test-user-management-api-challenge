@@ -1,0 +1,56 @@
+name: Pull_Request_Check
+on:
+  pull_request:
+    types:
+      [ edited, opened, ready_for_review, reopened, synchronize]
+  workflow_dispatch:
+
+jobs:
+  check_pr_content:
+    name: PR_Not_Empty
+    runs-on: ubuntu-latest
+    steps:
+      - name: Title_And_Desc
+        uses: actions/github-script@v3
+        with:
+          script: |
+            const theTitle = context.payload.pull_request.title
+            const theDescription = context.payload.pull_request.body
+            
+            const isNotEmptyTitle = theTitle && theTitle.match(/\s/);
+            const isNotEmptyDesc = theDescription && theDescription.match(/\s/);
+            
+            if (!isNotEmptyTitle || !isNotEmptyDesc) {
+              console.error(`Invalid PR, Cant Be Blank!`);
+              process.exit(1);
+            }
+  health-check:
+    name: PR_Health_Check
+    runs-on: ubuntu-latest
+    needs: [ check_pr_content ]
+    steps:
+      - name: Checkout_Code
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+
+      - name: Set_Up_JDK
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Set_Up_Docker_Image_Container
+        run: |
+          docker run -d -p 3000:3000 ghcr.io/danielsilva-loanpro/sdet-interview-challenge:latest
+
+      - name: Wait_For_Readiness
+        run: |
+          echo "Waiting for API..."
+          sleep 10
+
+      - name: Execute_DEV_Regression
+        working-directory: sdet
+        run: mvn clean test -Dcucumber.filter.tags="@health-check"
+        env:
+          BASE_URL: http://localhost:3000/dev

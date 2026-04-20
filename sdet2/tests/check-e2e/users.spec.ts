@@ -13,7 +13,7 @@ test.describe('@e2e User Management API Validation, End To End Tests', () => {
   test.afterEach(async () => {
     if (createdEmail) {
       const deleteResponse = await client.delete(`/users/${createdEmail}`);
-      console.log(`Teardown - Deleted: ${createdEmail} → ${deleteResponse.status()}`);
+      console.log(`Deleted: ${createdEmail}`);
       createdEmail = '';
     }
   });

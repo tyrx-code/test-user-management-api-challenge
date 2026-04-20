@@ -1,4 +1,4 @@
-name: TGR_QA_Run_Scripts
+name: TGR_Java_QA_Run_Scripts
 
 on:
   workflow_dispatch:
@@ -21,6 +21,7 @@ on:
 
 jobs:
   automated-test-suite:
+    name: JavaCucumber - ${{ github.event.inputs.tag }} - ${{ github.event.inputs.env }}
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -81,7 +82,7 @@ jobs:
           path: sdet/target/extent-report/index.html
 
       - name: Test_Summary_Report
-        uses: dorny/test-reporter@v1
+        uses: dorny/test-reporter@v1.8.0
         if: success() || failure()
         with:
           name: Test Results - ${{ github.event.inputs.env }} - ${{ github.event.inputs.tag }}

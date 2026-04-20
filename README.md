@@ -1,4 +1,13 @@
 # User Management — Sample Test Framework
+### Notes for reviewer: 
+- I initially created a POC Frm Using Java and Cucumber, that includes GHActions and more as you can see in this readme documentation. **Main**
+- Later I added like a bonus POC, now trying Typescript, Playwright and GHActions, these are not my main tools, but I decided to give it a chance. **Secondary**
+- Main project lives inside **sdet** folder.
+- Second project lives inside **sdet2** folder.
+- Since Workflows are at root, we can run independently by pointing to working-directory.
+- Below Info was created for Java Repo.
+- Bugs reports are independent of the tool.
+- If interested you can check my dummy commits at the Pull Request history, I created individual PRs for each task.
 
 ## Summary
 User Management is an API for user data management (crud). In this repo I set the basics for an API test framework. 

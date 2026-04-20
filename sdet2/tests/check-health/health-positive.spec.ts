@@ -1,12 +1,24 @@
 import { test, expect } from '@playwright/test';
 import { ApiClient } from '../helpers/apiClient';
 
-test.describe('@positive API Validation, Basic Positive Tests', () => {
+test.describe('@smoke API Validation, Basic Positive Tests', () => {
 
   let client: ApiClient;
+  let genericEmail : string;
 
   test.beforeEach(async ({ request }) => {
     client = new ApiClient(request);
+
+    genericEmail = `generic_${Date.now()}@test.com`;
+    await client.post('/users', {name: 'test_generic_purpose', email: genericEmail, age: 32});
+  });
+
+  test.afterEach(async () => {
+    if (genericEmail) {
+      const deleteResponse = await client.delete(`/users/${genericEmail}`);
+      console.log(`Deleted: ${genericEmail}`);
+      genericEmail = '';
+    }
   });
 
   test('Validate GET Action, Fetch All Users', async () => {
