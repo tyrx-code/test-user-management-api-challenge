@@ -39,11 +39,11 @@ jobs:
         with:
           node-version: '20'
 
-      - name: Install_Dependencies
+      - name: Install_NPM_Dependencies
         working-directory: sdet2
         run: npm install
 
-      - name: Install_Playwright_Browsers
+      - name: Install_Playwright_Config
         working-directory: sdet2
         run: npx playwright install --with-deps
 
