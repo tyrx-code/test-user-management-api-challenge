@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 import { ApiClient } from '../helpers/apiClient';
 
-test.describe('@positive API Validation, Basic Positive Tests', () => {
+test.describe('@smoke API Validation, Basic Positive Tests', () => {
 
   let client: ApiClient;
 
