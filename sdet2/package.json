@@ -1,0 +1,15 @@
+{
+  "name": "sdet2",
+  "version": "1.0.0",
+  "scripts": {
+    "test": "npx playwright test",
+    "test:smoke": "npx playwright test --grep @smoke",
+    "test:e2e": "npx playwright test --grep @e2e",
+    "report": "npx playwright show-report"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.42.0",
+    "@types/node": "^20.0.0",
+    "typescript": "^5.0.0"
+  }
+}
