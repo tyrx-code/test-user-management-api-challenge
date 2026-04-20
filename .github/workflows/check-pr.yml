@@ -27,6 +27,7 @@ jobs:
   health-check:
     name: PR_Health_Check
     runs-on: ubuntu-latest
+    needs: [ check_pr_content ]
     steps:
       - name: Checkout_Code
         uses: actions/checkout@v4
