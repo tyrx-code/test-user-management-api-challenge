@@ -1,4 +1,4 @@
-name: TGR_TS_Playwright_Tests
+name: TGR_TS_QA_Playwright_Tests
 
 on:
   workflow_dispatch:
